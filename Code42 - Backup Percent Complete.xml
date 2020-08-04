@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?><extensionAttribute>
+<displayName>Code42 - Backup Percent Complete</displayName>
+<description>This attribute displays the backup percent complete based on the total size of selected files and the total size of files that CrashPlan has yet to back up.  This attribute applies to both Mac and Windows.</description>
+<dataType>number</dataType>
+<scriptContentsMac>#!/bin/sh&#13;
+&#13;
+####################################################&#13;
+### INFO ###&#13;
+#Found at: https://github.com/RHI0/Code42-EAs&#13;
+#Revamped by: Rhio&#13;
+#Revamped on: August, 4th, 2020&#13;
+#Display Name: Code42 - Percent Complete&#13;
+#Description: This attribute displays the last percentage completion of the first archive of the GUID. &#13;
+#Data Type: Integer&#13;
+#Input Type: Script&#13;
+####################################################&#13;
+&#13;
+&#13;
+&#13;
+&#13;
+####################################################&#13;
+### VARIABLES ###&#13;
+&#13;
+#use the server address utilized to log into a fresh client installed manual deployment&#13;
+CP_ServerAddress="central.crashplan.com"&#13;
+&#13;
+#This port should work for everyone, it may be different if you have an on-prem install and have altered your ports from the default ports&#13;
+CP_ServerPort="4285"&#13;
+&#13;
+#Configure an API account with the minimum roles possible, for cloud customers, this would be an Org Admin or All Org Admin, and must be a LOCAL account within the console. If you are a cloud customer, this is also required to be a full email address.&#13;
+CP_AdminUsername="yourAPIacct@yourorg.com"&#13;
+&#13;
+#If desired you could encrypt this with base 64 or a keypair stored in a separate file or config profile elsewhere on the machine to avoid having it in plaintext. Since you should have limited the rights of this account, the vulnerability should be reduced.&#13;
+CP_AdminPassword=""&#13;
+&#13;
+####################################################&#13;
+&#13;
+&#13;
+&#13;
+&#13;
+####################################################&#13;
+### LOGIC ###&#13;
+&#13;
+if [ "$CP_ServerAddress" == "" ] || [ "$CP_ServerPort" == "" ] || [ "$CP_AdminUsername" == "" ] || [ "$CP_AdminPassword" == "" ];then&#13;
+&#13;
+	echo "Please ensure all variables are set in the extension attribute script."&#13;
+&#13;
+else&#13;
+&#13;
+	if [ -f /Library/Application\ Support/CrashPlan/.identity ];then&#13;
+		&#13;
+		#Checks the Unique Code42 Identifier to the currently running backup; the directory may need to be updated if they ever change the name of their cached settings directory&#13;
+		GUID=`/bin/cat /Library/Application\ Support/CrashPlan/.identity | grep guid | sed s/guid\=//g`&#13;
+		&#13;
+		#Queries API of your Code42 instance then uses Python to parse the JSON that's returned for the nested arrayed key pair (under "data" &gt; "backupUsage") of percentComplete for the first archive. If a client is backing up to more than one physical location you will need to add a loop to iterate over the array&#13;
+		value=`/usr/bin/curl -u "$CP_AdminUsername":"$CP_AdminPassword" -k "https://"$CP_ServerAddress":"$CP_ServerPort"/api/Computer/"$GUID"?idType=guid&amp;incBackupUsage=true" | python -c 'import json,sys;print json.load(sys.stdin)["data"]["backupUsage"][0]["percentComplete"]'`&#13;
+&#13;
+		#Filters off unwanted parts of the value due to the results being in an array&#13;
+		#result=`echo "$value" | sed 's/...\(.*\)/\1/' | sed 's/\(.*\)../\1/'`&#13;
+				&#13;
+		echo "&lt;result&gt;$value&lt;/result&gt;"&#13;
+	&#13;
+	else&#13;
+	&#13;
+		echo "&lt;result&gt;Not installed&lt;/result&gt;"&#13;
+	&#13;
+	fi&#13;
+fi&#13;
+####################################################</scriptContentsMac>
+</extensionAttribute>
