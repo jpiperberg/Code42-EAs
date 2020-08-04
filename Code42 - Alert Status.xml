@@ -3,12 +3,22 @@
 <description>This attribute displays the CrashPlan alert status of the computer.  "OK" if the computer has backed up within defined days, "WarningConnectionAlert" if computer has exceeded "warning" threshold, "CriticalConnectionAlert" if computer has exceeded "alert" threshold.</description>
 <dataType>string</dataType>
 <scriptContentsMac>#!/bin/sh&#13;
+&#13;
+####################################################&#13;
+### INFO ###&#13;
 #Revamped by: Rhio&#13;
 #Revamped on: August, 8th, 2020&#13;
 #Display Name: Code42 - Alert Status&#13;
 #Description: This attribute displays the Alert Status of Code42. &#13;
 #Data Type: String&#13;
 #Input Type: Script&#13;
+####################################################&#13;
+&#13;
+&#13;
+&#13;
+&#13;
+####################################################&#13;
+### VARIABLES ###&#13;
 &#13;
 #use the server address utilized to log into a fresh client installed manual deployment&#13;
 CP_ServerAddress="central.crashplan.com"&#13;
@@ -23,7 +33,13 @@ CP_AdminUsername="yourAPIacct@yourorg.com"&#13;
 #If desired you could encrypt this with base 64 or a keypair stored in a separate file or config profile elsewhere on the machine to avoid having it in plaintext. Since you should have limited the rights of this account, the vulnerability should be reduced.&#13;
 CP_AdminPassword=""&#13;
 &#13;
+####################################################&#13;
 &#13;
+&#13;
+&#13;
+&#13;
+####################################################&#13;
+### LOGIC ###&#13;
 &#13;
 if [ "$CP_ServerAddress" == "" ] || [ "$CP_ServerPort" == "" ] || [ "$CP_AdminUsername" == "" ] || [ "$CP_AdminPassword" == "" ];then&#13;
 &#13;
@@ -49,5 +65,6 @@ else&#13;
 		echo "&lt;result&gt;Not installed&lt;/result&gt;"&#13;
 	&#13;
 	fi&#13;
-fi</scriptContentsMac>
+fi&#13;
+####################################################</scriptContentsMac>
 </extensionAttribute>
