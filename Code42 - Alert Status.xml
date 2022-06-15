@@ -8,6 +8,8 @@
 ### INFO ###&#13;
 #Revamped by: Rhio&#13;
 #Revamped on: August, 8th, 2020&#13;
+#Revamped again on: April 28th, 2022 by Jamie Piperberg&#13;
+#Revamped because: python 2.7 was removed from macOS 12.3&#13;
 #Display Name: Code42 - Alert Status&#13;
 #Description: This attribute displays the Alert Status of Code42. &#13;
 #Data Type: String&#13;
@@ -22,9 +24,11 @@
 &#13;
 #use the server address utilized to log into a fresh client installed manual deployment&#13;
 CP_ServerAddress="central.crashplan.com"&#13;
+#CP_ServerAddress="console.us2.crashplan.com"&#13;
 &#13;
 #This port should work for everyone, it may be different if you have an on-prem install and have altered your ports from the default ports&#13;
 CP_ServerPort="4285"&#13;
+#CP_ServerPort="443"&#13;
 &#13;
 &#13;
 #Configure an API account with the minimum roles possible, for cloud customers, this would be an Org Admin or All Org Admin, and must be a LOCAL account within the console. If you are a cloud customer, this is also required to be a full email address.&#13;
@@ -52,11 +56,14 @@ else&#13;
 		#Checks the Unique Code42 Identifier to the currently running backup; the directory may need to be updated if they ever change the name of their cached settings directory&#13;
 		GUID=`/bin/cat /Library/Application\ Support/CrashPlan/.identity | grep guid | sed s/guid\=//g`&#13;
 		&#13;
-		#Queries API of your Code42 instance then uses Python to parse the JSON that's returned for the nested key pair that's in an array (under "data") of alertStates&#13;
-		value=`/usr/bin/curl -u "$CP_AdminUsername":"$CP_AdminPassword" -k "https://"$CP_ServerAddress":"$CP_ServerPort"/api/Computer/"$GUID"?idType=guid" | python -c 'import json,sys;print json.load(sys.stdin)["data"]["alertStates"]'`&#13;
+		#Queries API of your Code42 instance then uses shell tools to parse the data&#13;
+		#This will break if the vendor changes the JSON schema, but will work without bundling your own python or python3 on your endpoints&#13;
+		#python3 code is python3 -c 'import json,sys;print(json.load(sys.stdin)["data"]["alertStates"])' if you go that route
+		#(replaces everything after the awk)
+		value=`/usr/bin/curl -u "$CP_AdminUsername":"$CP_AdminPassword" -k "https://"$CP_ServerAddress":"$CP_ServerPort"/api/Computer/"$GUID"?idType=guid" |  awk -F"alertStates\":" '{split($2,a,"\""); print a[2]}'``&#13;
 &#13;
-		#Filters off unwanted parts of the value due to the results being in an array&#13;
-		result=`echo "$value" | sed 's/...\(.*\)/\1/' | sed 's/\(.*\)../\1/'`&#13;
+		#Filters off unwanted parts of the value due to the results being in an array (and the square brackets)&#13;
+		result=`echo "$value" | sed 's/...(.*)/1/' | sed 's/(.*)../1/' |  sed 's/[][]//g'`&#13;
 		&#13;
 		echo "&lt;result&gt;$result&lt;/result&gt;"&#13;
 	&#13;
