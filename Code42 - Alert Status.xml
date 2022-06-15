@@ -58,8 +58,8 @@ else&#13;
 		&#13;
 		#Queries API of your Code42 instance then uses shell tools to parse the data&#13;
 		#This will break if the vendor changes the JSON schema, but will work without bundling your own python or python3 on your endpoints&#13;
-		#python3 code is python3 -c 'import json,sys;print(json.load(sys.stdin)["data"]["alertStates"])' if you go that route
-		#(replaces everything after the awk)
+		#python3 code is python3 -c 'import json,sys;print(json.load(sys.stdin)["data"]["alertStates"])' if you go that route&#13;
+		#(replaces everything after the awk)&#13;
 		value=`/usr/bin/curl -u "$CP_AdminUsername":"$CP_AdminPassword" -k "https://"$CP_ServerAddress":"$CP_ServerPort"/api/Computer/"$GUID"?idType=guid" |  awk -F"alertStates\":" '{split($2,a,"\""); print a[2]}'``&#13;
 &#13;
 		#Filters off unwanted parts of the value due to the results being in an array (and the square brackets)&#13;

@@ -6,6 +6,8 @@
 
 # Written by Rhio
 # Written on July 30th, 2020
+# Revamped on: April 28th, 2022 by Jamie Piperberg&#13;
+# Revamped because: python 2.7 was removed from macOS 12.3&#13;
 # AppleScript section written by Code42
 # Script will reference the email address assigned via
 # 	Jamf Connect Sync or Jamf Connect Verify and use
@@ -25,7 +27,7 @@
 ######################################## VARIABLES ########################################
 
 # Logged in User detection
-user=$(/usr/bin/python -c 'from SystemConfiguration import SCDynamicStoreCopyConsoleUser; import sys; username = (SCDynamicStoreCopyConsoleUser(None, None, None) or [None])[0]; username = [username,""][username in [u"loginwindow", None, u""]]; sys.stdout.write(username + "\n");')
+user=$(echo "show State:/Users/ConsoleUser" | scutil | awk '/Name :/ && ! /loginwindow/ { print $3 }')
 
 # Logged in User directory
 userHome=$(dscl . -read "/users/$user" NFSHomeDirectory | cut -d ' ' -f 2)

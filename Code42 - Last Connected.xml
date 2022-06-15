@@ -9,6 +9,8 @@
 #Revamped by: Rhio&#13;
 #Revamped on: August, 8th, 2020&#13;
 #Display Name: Code42 - Last Connected&#13;
+#Revamped again on: April 28th, 2022 by Jamie Piperberg&#13;
+#Revamped because: python 2.7 was removed from macOS 12.3&#13;
 #Description: This attribute displays the last time Code42 established a connection with the server. &#13;
 #Data Type: Date&#13;
 #Input Type: Script&#13;
@@ -52,8 +54,12 @@ else&#13;
 		#Checks the Unique Code42 Identifier to the currently running backup; the directory may need to be updated if they ever change the name of their cached settings directory&#13;
 		GUID=`/bin/cat /Library/Application\ Support/CrashPlan/.identity | grep guid | sed s/guid\=//g`&#13;
 		&#13;
-		#Queries API of your Code42 instance then uses Python to parse the JSON that's returned for the nested key pair (under "data") of lastConnected&#13;
-		value=`/usr/bin/curl -u "$CP_AdminUsername":"$CP_AdminPassword" -k "https://"$CP_ServerAddress":"$CP_ServerPort"/api/Computer/"$GUID"?idType=guid" | python -c 'import json,sys;print json.load(sys.stdin)["data"]["lastConnected"]'`&#13;
+		#Queries API of your Code42 instance then uses shell tools to parse the data&#13;
+		#This will break if the vendor changes the JSON schema, but will work without bundling your own python or python3 on your endpoints&#13;
+		#python3 code is python3 -c 'import json,sys;print( json.load(sys.stdin)["data"]["lastConnected"])' if you go that route&#13;
+		#( replaces everything between the first and second | ) &#13;
+
+		value=`/usr/bin/curl -u "$CP_AdminUsername":"$CP_AdminPassword" -k "https://"$CP_ServerAddress":"$CP_ServerPort"/api/Computer/"$GUID"?idType=guid" | awk -F"\"lastConnected\":\"" '{print $2}' | awk -F\" '{split($1,a,"."); print a[1]}'`&#13;
 		&#13;
 		#Converts the time format from the resulting JSON to the Jamf Smart Group compatible format &#13;
 		result=`/bin/date -j -f "%Y-%m-%dT%H:%M:%S" "$value" "+%Y-%m-%d %H:%M:%S"`&#13;

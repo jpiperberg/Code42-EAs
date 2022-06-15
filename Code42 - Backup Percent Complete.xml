@@ -53,7 +53,7 @@ else&#13;
 		GUID=`/bin/cat /Library/Application\ Support/CrashPlan/.identity | grep guid | sed s/guid\=//g`&#13;
 		&#13;
 		#Queries API of your Code42 instance then uses Python to parse the JSON that's returned for the nested arrayed key pair (under "data" &gt; "backupUsage") of percentComplete for the first archive. If a client is backing up to more than one physical location you will need to add a loop to iterate over the array&#13;
-		value=`/usr/bin/curl -u "$CP_AdminUsername":"$CP_AdminPassword" -k "https://"$CP_ServerAddress":"$CP_ServerPort"/api/Computer/"$GUID"?idType=guid&amp;incBackupUsage=true" | python -c 'import json,sys;print json.load(sys.stdin)["data"]["backupUsage"][0]["percentComplete"]'`&#13;
+		value=`/usr/bin/curl -u "$CP_AdminUsername":"$CP_AdminPassword" -k "https://"$CP_ServerAddress":"$CP_ServerPort"/api/Computer/"$GUID"?idType=guid&amp;incBackupUsage=true" | awk -F"percentComplete\":" '{split($2,a,","); print a[1]}'`&#13;
 				&#13;
 		echo "&lt;result&gt;$value&lt;/result&gt;"&#13;
 	&#13;
